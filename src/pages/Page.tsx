@@ -1,11 +1,35 @@
-import { IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import { useParams } from 'react-router';
-import ExploreContainer from '../components/ExploreContainer';
-import './Page.css';
+import {
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonMenuButton,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+} from "@ionic/react";
+import { JSX, useMemo } from "react";
+import { useParams } from "react-router";
+import ExploreContainer from "../components/ExploreContainer";
+import TaskOne from "../components/TaskOne";
+import TaskTwo from "../components/TaskTwo";
+import TaskThree from "../components/TaskThree";
+import "./Page.css";
+
+const taskPages: Record<string, { title: string; view: JSX.Element }> = {
+  task1: { title: "Task 1", view: <TaskOne /> },
+  task2: { title: "Task 2", view: <TaskTwo /> },
+  task3: { title: "Task 3", view: <TaskThree /> },
+};
 
 const Page: React.FC = () => {
+  const { name } = useParams<{ name: string }>();
+  const normalizedName = name?.toLowerCase();
+  const currentTask = normalizedName ? taskPages[normalizedName] : undefined;
 
-  const { name } = useParams<{ name: string; }>();
+  const friendlyTitle = useMemo(
+    () => currentTask?.title ?? name,
+    [currentTask?.title, name]
+  );
 
   return (
     <IonPage>
@@ -14,17 +38,18 @@ const Page: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonTitle>{name}</IonTitle>
+          <IonTitle>{friendlyTitle}</IonTitle>
         </IonToolbar>
       </IonHeader>
 
       <IonContent fullscreen>
         <IonHeader collapse="condense">
           <IonToolbar>
-            <IonTitle size="large">{name}</IonTitle>
+            <IonTitle size="large">{friendlyTitle}</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <ExploreContainer name={name} />
+
+        {currentTask ? currentTask.view : <ExploreContainer name={name} />}
       </IonContent>
     </IonPage>
   );

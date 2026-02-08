@@ -1,0 +1,19 @@
+
+.matrix-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.matrix-cell {
+  padding: 8px;
+  text-align: center;
+  border-radius: 4px;
+  background: var(--ion-color-step-50, #f4f5f8);
+  font-weight: 500;
+}
+
+.matrix-cell--highlight {
+  background: rgba(255, 99, 132, 0.2);
+  color: #c2185b;
+  font-weight: 700;
+}
