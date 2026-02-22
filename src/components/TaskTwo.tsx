@@ -1,111 +1,222 @@
-﻿import {
+import {
   IonButton,
   IonCard,
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
-  IonInput,
-  IonItem,
-  IonLabel,
-  IonList,
+  IonSpinner,
   IonText,
 } from "@ionic/react";
-import type {
-  IonInputCustomEvent,
-  InputChangeEventDetail,
-} from "@ionic/core/components";
-import { useState } from "react";
+import {
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
+} from "chart.js";
+import { useEffect, useMemo, useState } from "react";
+import { Bar } from "react-chartjs-2";
+
+interface Lesson {
+  date: string;
+  day_of_week: string;
+  subject: string;
+  room: string;
+  period: number;
+}
+
+interface GroupData {
+  group_id: string;
+  lessons: Lesson[];
+}
+
+interface DailyLoadStat {
+  day: string;
+  lesson_count: number;
+}
+
+interface TeacherSchedule {
+  teacher_name: string;
+  semester: string;
+  groups_data: GroupData[];
+  daily_load_stats: DailyLoadStat[];
+}
+
+interface JsonBinResponse {
+  teacher_schedule?: TeacherSchedule;
+  record?: {
+    teacher_schedule?: TeacherSchedule;
+  };
+}
+
+const BIN_ID = "699b246e43b1c97be993f7e1";
+const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+);
 
 const TaskTwo: React.FC = () => {
-  const [range, setRange] = useState({ start: "", end: "" });
+  const [schedule, setSchedule] = useState<TeacherSchedule | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [numbers, setNumbers] = useState<number[]>([]);
-  const [hasCalculated, setHasCalculated] = useState(false);
+  const [sortAscending, setSortAscending] = useState(true);
 
-  const handleChange =
-    (key: "start" | "end") =>
-    (event: IonInputCustomEvent<InputChangeEventDetail>) => {
-      const value = event.detail.value ?? "";
-      setRange((prev) => ({ ...prev, [key]: value }));
-    };
-
-  const handleCalculate = () => {
-    const start = Number(range.start);
-    const end = Number(range.end);
-
-    if (Number.isNaN(start) || Number.isNaN(end)) {
-      setError("Будь ласка, введіть коректні числа для проміжку [a, b].");
-      setNumbers([]);
-      setHasCalculated(false);
-      return;
-    }
-
-    const [from, to] = start <= end ? [start, end] : [end, start];
-    const selected: number[] = [];
-
-    for (let current = from; current <= to; current += 1) {
-      const isEven = current % 2 === 0;
-      const hasRemainderTwo = current % 3 === 2;
-      if (isEven && hasRemainderTwo) {
-        selected.push(current);
-      }
-    }
-
-    setNumbers(selected);
+  const fetchSchedule = async () => {
+    setIsLoading(true);
     setError(null);
-    setHasCalculated(true);
+
+    try {
+      const response = await fetch(BIN_URL);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const payload = (await response.json()) as JsonBinResponse;
+      const teacherSchedule =
+        payload.record?.teacher_schedule ?? payload.teacher_schedule;
+
+      if (
+        !teacherSchedule ||
+        !Array.isArray(teacherSchedule.groups_data) ||
+        !Array.isArray(teacherSchedule.daily_load_stats)
+      ) {
+        throw new Error("Некоректна структура даних у JSON.");
+      }
+
+      setSchedule(teacherSchedule);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Невідома помилка завантаження.";
+      setError(`Не вдалося завантажити дані: ${message}`);
+      setSchedule(null);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  useEffect(() => {
+    void fetchSchedule();
+  }, []);
+
+  const sortedGroups = useMemo(() => {
+    if (!schedule) {
+      return [];
+    }
+    return [...schedule.groups_data].sort((a, b) => {
+      const compare = a.group_id.localeCompare(b.group_id, "uk");
+      return sortAscending ? compare : -compare;
+    });
+  }, [schedule, sortAscending]);
+
+  const dailyLoadChartData = useMemo(() => {
+    if (!schedule) {
+      return null;
+    }
+
+    return {
+      labels: schedule.daily_load_stats.map((item) => item.day),
+      datasets: [
+        {
+          label: "Кількість занять",
+          data: schedule.daily_load_stats.map((item) => item.lesson_count),
+          backgroundColor: "rgba(56, 128, 255, 0.5)",
+          borderColor: "rgba(56, 128, 255, 1)",
+          borderWidth: 1,
+        },
+      ],
+    };
+  }, [schedule]);
+
+  const dailyLoadChartOptions = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            precision: 0,
+          },
+        },
+      },
+    }),
+    [],
+  );
 
   return (
     <IonCard>
       <IonCardHeader>
-        <IonCardTitle>
-          Парні числа, що при діленні на 3 дають остачу 2
-        </IonCardTitle>
+        <IonCardTitle>Лабораторна робота 2: Розклад викладача</IonCardTitle>
       </IonCardHeader>
       <IonCardContent>
-        <IonList>
-          <IonItem>
-            <IonLabel position="floating">Початок проміжку (a)</IonLabel>
-            <IonInput
-              type="number"
-              value={range.start}
-              onIonChange={handleChange("start")}
-            />
-          </IonItem>
-          <IonItem>
-            <IonLabel position="floating">Кінець проміжку (b)</IonLabel>
-            <IonInput
-              type="number"
-              value={range.end}
-              onIonChange={handleChange("end")}
-            />
-          </IonItem>
-        </IonList>
+        <IonButton expand="block" onClick={() => void fetchSchedule()}>
+          Оновити дані
+        </IonButton>
+
+        {schedule && (
+          <IonText className="ion-margin-top">
+            <p>
+              <strong>Викладач:</strong> {schedule.teacher_name}
+            </p>
+            <p>
+              <strong>Семестр:</strong> {schedule.semester}
+            </p>
+          </IonText>
+        )}
+
         <IonButton
           expand="block"
+          fill="outline"
           className="ion-margin-top"
-          onClick={handleCalculate}
+          disabled={!schedule || isLoading}
+          onClick={() => setSortAscending((prev) => !prev)}
         >
-          Знайти числа
+          Сортувати за group_id ({sortAscending ? "A->Я" : "Я->A"})
         </IonButton>
+
+        {isLoading && (
+          <div className="ion-text-center ion-margin-top">
+            <IonSpinner name="crescent" />
+          </div>
+        )}
+
         {error && (
           <IonText color="danger" className="ion-margin-top ion-text-center">
             <p>{error}</p>
           </IonText>
         )}
-        {hasCalculated && !error && numbers.length > 0 && (
-          <IonText className="ion-margin-top ion-text-center" color="primary">
-            <p>
-              Знайдені числа: <strong>{numbers.join(", ")}</strong>
-            </p>
-            <p>Кількість чисел: {numbers.length}</p>
-          </IonText>
-        )}
-        {hasCalculated && !error && numbers.length === 0 && (
-          <IonText className="ion-margin-top ion-text-center">
-            <p>На цьому проміжку немає чисел, що задовольняють умову.</p>
-          </IonText>
+
+        {!isLoading && !error && schedule && (
+          <>
+            <ul className="group-list ion-margin-top">
+              {sortedGroups.map((group) => (
+                <li key={group.group_id}>
+                  <strong>{group.group_id}</strong>
+                  <ul className="lesson-sublist">
+                    {group.lessons.map((lesson) => (
+                      <li key={`${group.group_id}-${lesson.date}-${lesson.period}`}>
+                        {lesson.day_of_week}, {lesson.date}: {lesson.subject},
+                        ауд. {lesson.room}, пара {lesson.period}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+
+            {dailyLoadChartData && (
+              <div className="daily-chart-wrapper ion-margin-top">
+                <Bar data={dailyLoadChartData} options={dailyLoadChartOptions} />
+              </div>
+            )}
+          </>
         )}
       </IonCardContent>
     </IonCard>

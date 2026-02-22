@@ -17,3 +17,26 @@
   color: #c2185b;
   font-weight: 700;
 }
+
+.group-list {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.group-list > li {
+  margin-bottom: 10px;
+}
+
+.lesson-sublist {
+  margin-top: 6px;
+  padding-left: 20px;
+}
+
+.lesson-sublist > li {
+  margin-bottom: 6px;
+}
+
+.daily-chart-wrapper {
+  position: relative;
+  min-height: 280px;
+}

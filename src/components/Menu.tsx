@@ -41,6 +41,12 @@ const appPages: AppPage[] = [
     mdIcon: calculatorSharp,
   },
   {
+    title: "Lab 2 (JSONBin)",
+    url: "/folder/lab2",
+    iosIcon: calculatorOutline,
+    mdIcon: calculatorSharp,
+  },
+  {
     title: "Task 3",
     url: "/folder/task3",
     iosIcon: colorPaletteOutline,

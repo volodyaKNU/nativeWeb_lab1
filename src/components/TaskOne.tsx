@@ -24,9 +24,11 @@ const TaskOne: React.FC = () => {
   });
   const [result, setResult] = useState<number | null>(null);
 
+  const [negativeNum, setNegativeNum] = useState<number | null>(null);
+
   const handleChange = (
     key: "first" | "second" | "third",
-    event: IonInputCustomEvent<InputChangeEventDetail>
+    event: IonInputCustomEvent<InputChangeEventDetail>,
   ) => {
     const value = event.detail.value ?? "";
     setNumbers((prev) => ({ ...prev, [key]: value }));
@@ -35,8 +37,12 @@ const TaskOne: React.FC = () => {
   const handleCalculate = () => {
     const values = [numbers.first, numbers.second, numbers.third].map(Number);
     const divisibleCount = values.filter(
-      (value) => !Number.isNaN(value) && value % 27 === 0
+      (value) => !Number.isNaN(value) && value % 27 === 0,
     ).length;
+    const negativeCount = values.filter(
+      (values) => !Number.isNaN(values) && values < 0,
+    ).length;
+    setNegativeNum(negativeCount);
     setResult(divisibleCount);
   };
 
@@ -85,6 +91,14 @@ const TaskOne: React.FC = () => {
           <IonText className="ion-margin-top ion-text-center" color="primary">
             <p>
               Кількість чисел, кратних 27: <strong>{result}</strong>
+            </p>
+          </IonText>
+        )}
+
+        {result !== null && (
+          <IonText>
+            <p>
+              <p>Кількість від'ємних : {negativeNum}</p>
             </p>
           </IonText>
         )}

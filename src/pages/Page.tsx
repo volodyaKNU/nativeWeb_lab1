@@ -18,6 +18,7 @@ import "./Page.css";
 const taskPages: Record<string, { title: string; view: JSX.Element }> = {
   task1: { title: "Task 1", view: <TaskOne /> },
   task2: { title: "Task 2", view: <TaskTwo /> },
+  lab2: { title: "Lab 2 (JSONBin)", view: <TaskTwo /> },
   task3: { title: "Task 3", view: <TaskThree /> },
 };
 
