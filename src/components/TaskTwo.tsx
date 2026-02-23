@@ -19,6 +19,14 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { Bar } from "react-chartjs-2";
 
+const PREDIFINED_DAYS = {
+  Понеділок: 0,
+  Вівторок: 0,
+  Середа: 0,
+  Четвер: 0,
+  "П'ятниця": 0,
+};
+
 interface Lesson {
   date: string;
   day_of_week: string;
@@ -115,24 +123,43 @@ const TaskTwo: React.FC = () => {
     });
   }, [schedule, sortAscending]);
 
+  const labelsWithDataRaw = useMemo(() => {
+    const initValue = { ...PREDIFINED_DAYS };
+    if (!schedule?.groups_data?.length) return initValue;
+
+    schedule.groups_data.forEach((group) => {
+      group.lessons.forEach((lesson) => {
+        if (lesson.day_of_week in initValue) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-expect-error
+          initValue[lesson.day_of_week] += 1;
+        }
+      });
+    });
+
+    return initValue;
+  }, [schedule]);
+
+  console.log(labelsWithDataRaw);
+
   const dailyLoadChartData = useMemo(() => {
     if (!schedule) {
       return null;
     }
 
     return {
-      labels: schedule.daily_load_stats.map((item) => item.day),
+      labels: Object.keys(labelsWithDataRaw),
       datasets: [
         {
           label: "Кількість занять",
-          data: schedule.daily_load_stats.map((item) => item.lesson_count),
+          data: Object.values(labelsWithDataRaw),
           backgroundColor: "rgba(56, 128, 255, 0.5)",
           borderColor: "rgba(56, 128, 255, 1)",
           borderWidth: 1,
         },
       ],
     };
-  }, [schedule]);
+  }, [labelsWithDataRaw, schedule]);
 
   const dailyLoadChartOptions = useMemo(
     () => ({
@@ -201,7 +228,9 @@ const TaskTwo: React.FC = () => {
                   <strong>{group.group_id}</strong>
                   <ul className="lesson-sublist">
                     {group.lessons.map((lesson) => (
-                      <li key={`${group.group_id}-${lesson.date}-${lesson.period}`}>
+                      <li
+                        key={`${group.group_id}-${lesson.date}-${lesson.period}`}
+                      >
                         {lesson.day_of_week}, {lesson.date}: {lesson.subject},
                         ауд. {lesson.room}, пара {lesson.period}
                       </li>
@@ -213,7 +242,10 @@ const TaskTwo: React.FC = () => {
 
             {dailyLoadChartData && (
               <div className="daily-chart-wrapper ion-margin-top">
-                <Bar data={dailyLoadChartData} options={dailyLoadChartOptions} />
+                <Bar
+                  data={dailyLoadChartData}
+                  options={dailyLoadChartOptions}
+                />
               </div>
             )}
           </>
