@@ -17,6 +17,8 @@ import {
   calculatorSharp,
   colorPaletteOutline,
   colorPaletteSharp,
+  libraryOutline,
+  librarySharp,
 } from "ionicons/icons";
 import "./Menu.css";
 
@@ -51,6 +53,12 @@ const appPages: AppPage[] = [
     url: "/folder/task3",
     iosIcon: colorPaletteOutline,
     mdIcon: colorPaletteSharp,
+  },
+  {
+    title: "Lab 3 (Abstract classes)",
+    url: "/folder/lab3",
+    iosIcon: libraryOutline,
+    mdIcon: librarySharp,
   },
 ];
 
