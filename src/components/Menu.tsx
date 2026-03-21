@@ -11,6 +11,8 @@ import {
 } from "@ionic/react";
 import { useLocation } from "react-router-dom";
 import {
+  analyticsOutline,
+  analyticsSharp,
   bookOutline,
   bookSharp,
   calculatorOutline,
@@ -59,6 +61,12 @@ const appPages: AppPage[] = [
     url: "/folder/lab3",
     iosIcon: libraryOutline,
     mdIcon: librarySharp,
+  },
+  {
+    title: "Lab 5 (Services)",
+    url: "/folder/lab5",
+    iosIcon: analyticsOutline,
+    mdIcon: analyticsSharp,
   },
 ];
 

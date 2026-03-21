@@ -17,7 +17,16 @@ export class BookValidationError extends Error {
   }
 }
 
+export class BookDateValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "BookValidationError";
+  }
+}
+
 const isNonEmptyString = (value: string) => value.trim().length > 0;
+
+const isNotValidDate = (value: number) => value > 2000;
 
 export abstract class Book {
   constructor(
@@ -82,10 +91,14 @@ export class ScienceBook extends Book {
     author: string,
     pages: number,
     private readonly field: string,
+    private readonly yearOfRelease?: number,
   ) {
     super(title, author, pages);
     if (!isNonEmptyString(field)) {
       throw new BookValidationError("Field must not be empty.");
+    }
+    if (this.yearOfRelease && !isNotValidDate(this.yearOfRelease)) {
+      throw new BookDateValidationError("need actual date");
     }
   }
 

@@ -10,6 +10,7 @@ import {
 import { JSX, useMemo } from "react";
 import { useParams } from "react-router";
 import ExploreContainer from "../components/ExploreContainer";
+import LabFive from "../components/LabFive";
 import LabThree from "../components/LabThree";
 import TaskOne from "../components/TaskOne";
 import TaskTwo from "../components/TaskTwo";
@@ -22,6 +23,7 @@ const taskPages: Record<string, { title: string; view: JSX.Element }> = {
   lab2: { title: "Lab 2 (JSONBin)", view: <TaskTwo /> },
   task3: { title: "Task 3", view: <TaskThree /> },
   lab3: { title: "Lab 3 (Abstract classes)", view: <LabThree /> },
+  lab5: { title: "Lab 5 (Services)", view: <LabFive /> },
 };
 
 const Page: React.FC = () => {

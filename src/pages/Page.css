@@ -40,3 +40,31 @@
   position: relative;
   min-height: 280px;
 }
+
+.lab5-table-wrapper {
+  overflow-x: auto;
+}
+
+.lab5-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+}
+
+.lab5-table th,
+.lab5-table td {
+  border: 1px solid var(--ion-color-step-150, #d7d8da);
+  padding: 8px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.lab5-table th:first-child,
+.lab5-table td:first-child {
+  text-align: center;
+}
+
+.lab5-chart-wrapper {
+  position: relative;
+  min-height: 320px;
+}
